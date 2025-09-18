@@ -2,51 +2,44 @@ name: Build macOS .app
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [macos-13, macos-14]
-    runs-on: ${{ matrix.os }}
+  build-macos:
+    runs-on: macos-latest
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
+      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
+      # 3️⃣ Upgrade pip and install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install py2app
 
-      - name: Build app with py2app
+      # 4️⃣ Install py2app for packaging
+      - name: Install py2app
+        run: pip install py2app
+
+      # 5️⃣ Build the .app
+      - name: Build .app
         run: |
-          rm -rf build dist
+          mkdir -p dist
           python setup.py py2app
 
-      - name: Show dist
-        run: ls -la dist || true
-
-      - name: Package artifact
-        run: |
-          mkdir -p artifact
-          cp -R dist/*.app artifact/ || true
-          if [ -d "artifact" ]; then
-            cd artifact
-            zip -r "../silaigo_app_${{ matrix.os }}.zip" ./*.app || true
-            cd ..
-          fi
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      # 6️⃣ Upload artifact
+      - name: Upload macOS .app
+        uses: actions/upload-artifact@v3
         with:
-          name: silaigo_app_${{ matrix.os }}
-          path: silaigo_app_${{ matrix.os }}.zip
+          name: invoice-generator-app
+          path: dist
