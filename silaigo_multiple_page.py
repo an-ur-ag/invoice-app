@@ -10,6 +10,20 @@ from reportlab.pdfbase.ttfonts import TTFont
 import textwrap
 import subprocess
 import sys
+import sys
+import os
+
+# ---------------- BASE DIRECTORY ---------------- #
+if getattr(sys, 'frozen', False):
+    # Running as a bundled macOS app
+    BASE_DIR = sys._MEIPASS
+else:
+    # Running in normal Python environment
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Paths for PDF template and font
+PDF_TEMPLATE = os.path.join(BASE_DIR, "silaigo_invoice_final.pdf")
+FONT_FILE = os.path.join(BASE_DIR, "segoeui.ttf")
 
 # ---------------- PDF GENERATION ---------------- #
 
@@ -17,7 +31,7 @@ def generate_invoice(data, filename):
     """Generate multi-page invoice with static PDF layout"""
     base_dir = os.path.dirname(os.path.abspath(__file__))
     font_path = os.path.join(base_dir, "segoeui.ttf")
-    pdfmetrics.registerFont(TTFont("SegoeUI", font_path))
+    pdfmetrics.registerFont(TTFont("SegoeUI", FONT_FILE))
 
     items_per_page = 10
     total_items = len(data["items"])
@@ -100,7 +114,7 @@ def generate_invoice(data, filename):
 
         # Merge overlay with static layout
         existing_pdf_path = os.path.join(base_dir, "silaigo_invoice_final.pdf")
-        existing_pdf = PdfReader(open(existing_pdf_path, "rb"))
+        existing_pdf = PdfReader(open(PDF_TEMPLATE, "rb"))
         overlay_pdf = PdfReader(packet)
 
         base_page = existing_pdf.pages[0]
