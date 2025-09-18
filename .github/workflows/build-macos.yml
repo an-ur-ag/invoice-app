@@ -15,11 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up Python
+      # 2️⃣ Set up Python framework (Tkinter compatible)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+          architecture: x64
+          check-latest: true
 
       # 3️⃣ Upgrade pip and install dependencies
       - name: Install dependencies
@@ -27,17 +29,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4️⃣ Install py2app for packaging
+      # 4️⃣ Install py2app
       - name: Install py2app
         run: pip install py2app
 
       # 5️⃣ Build the .app
       - name: Build .app
         run: |
-          mkdir -p dist
           python setup.py py2app
 
-      # 6️⃣ Upload artifact
+      # 6️⃣ Upload the .app artifact
       - name: Upload macOS .app
         uses: actions/upload-artifact@v4
         with:
